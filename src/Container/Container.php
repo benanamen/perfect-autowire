@@ -2,6 +2,7 @@
 
 namespace PerfectApp\Container;
 
+use Closure;
 use ReflectionClass;
 use ReflectionException;
 
@@ -10,7 +11,7 @@ class Container
     private array $instances = [];
     private array $bindings = [];
 
-    public function bind(string $abstract, string $concrete): void
+    public function bind(string $abstract, mixed $concrete): void
     {
         $this->bindings[$abstract] = $concrete;
     }
@@ -18,11 +19,16 @@ class Container
     public function get(string $className): object
     {
         if (isset($this->bindings[$className])) {
-            $className = $this->bindings[$className];
+            $concrete = $this->bindings[$className];
+
+            if ($concrete instanceof Closure) {
+                return $concrete($this);
+            }
+
+            $className = $concrete;
         }
 
         if (!isset($this->instances[$className])) {
-
             try {
                 $reflectionClass = new ReflectionClass($className);
             } catch (ReflectionException $e) {
@@ -55,6 +61,7 @@ class Container
                 $this->instances[$className] = new $className();
             }
         }
+
         return $this->instances[$className];
     }
 }
