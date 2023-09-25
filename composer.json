@@ -1,0 +1,23 @@
+{
+    "name": "krubio/perfect-autowire",
+    "description": "Perfect-Autowire is a PHP-based project that focuses on autowiring and routing.",
+    "keywords": [
+        "Autowire",
+        "Attribute Routing"
+    ],
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kevin Rubio"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "PerfectApp\\": "src/"
+        }
+    },
+
+    "minimum-stability": "stable",
+    "require": {}
+}

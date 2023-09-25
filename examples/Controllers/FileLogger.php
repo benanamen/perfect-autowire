@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-require 'LoggerInterface.php';
+use App\Controllers\LoggerInterface;
 
 class FileLogger implements LoggerInterface
 {

@@ -6,6 +6,7 @@ use PerfectApp\Container\Container;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
+use ReflectionException;
 
 class Router
 {
@@ -20,11 +21,14 @@ class Router
     public function autoRegisterControllers(string $directory): void
     {
         if (!is_dir($directory)) {
-            throw new Exception("The directory $directory does not exist");
+            error_log("The directory $directory does not exist");
+            http_response_code(500);
+            die('Fatal Error. See Error log for details.');
         }
 
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
         foreach ($files as $file) {
+
             if ($file->isDir() || $file->getFilename()[0] === '.' || $file->getExtension() !== 'php') {
                 continue;
             }
@@ -40,7 +44,14 @@ class Router
 
     public function registerController(string $controllerName): void
     {
-        $reflectionClass = new ReflectionClass($controllerName);
+        try {
+            $reflectionClass = new ReflectionClass($controllerName);
+        } catch (ReflectionException $e) {
+            error_log("Failed to create Controller ReflectionClass for $controllerName: {$e->getMessage()}");
+            http_response_code(500);
+            die('Fatal Error. See Error log for details.');
+        }
+
         foreach ($reflectionClass->getMethods() as $method) {
             $routeAttributes = $method->getAttributes(Route::class);
             foreach ($routeAttributes as $routeAttribute) {
