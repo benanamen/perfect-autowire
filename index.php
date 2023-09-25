@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
 
-require_once __DIR__ . '/src/Container.php';
-require_once __DIR__ . '/src/Route.php';
-require_once __DIR__ . '/src/Router.php';
-require_once __DIR__ . '/src/Controllers/UserController.php';
-// ... any other required files
+use PerfectApp\Container\Container;
+use PerfectApp\Routing\Router;
+
+require './vendor/autoload.php';
 
 $container = new Container();
 $container->bind(LoggerInterface::class, FileLogger::class);

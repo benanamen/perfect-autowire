@@ -1,5 +1,9 @@
 <?php declare(strict_types=1);
 
+namespace PerfectApp\Container;
+
+use ReflectionClass;
+
 class Container
 {
     private array $instances = [];
@@ -36,5 +40,4 @@ class Container
         }
         return $this->instances[$className];
     }
-
 }

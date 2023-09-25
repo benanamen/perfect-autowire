@@ -1,5 +1,7 @@
 <?php declare(strict_types=1);
 
+use PerfectApp\Routing\Route;
+
 class PersonController
 {
     public function __construct(private readonly LoggerInterface $logger)
