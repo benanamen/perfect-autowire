@@ -6,16 +6,17 @@ require_once __DIR__ . '/src/Router.php';
 require_once __DIR__ . '/src/Controllers/UserController.php';
 // ... any other required files
 
-// Initialize the container and add the logger implementation
 $container = new Container();
-
 $container->bind(LoggerInterface::class, FileLogger::class);
 
-// Initialize the router
 $router = new Router($container);
 
 // Autoregister controllers
 $router->autoRegisterControllers(__DIR__ . '/src/Controllers');
 
+// Capture request URI and method
+$requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?? '';
+$requestMethod = $_SERVER['REQUEST_METHOD'];
+
 // Dispatch the request
-$router->dispatch();
+$router->dispatch($requestUri, $requestMethod);

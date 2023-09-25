@@ -13,7 +13,7 @@ class Router
     public function autoRegisterControllers(string $directory): void
     {
         if (!is_dir($directory)) {
-            throw new Exception("The directory {$directory} does not exist");
+            throw new Exception("The directory $directory does not exist");
         }
 
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
@@ -23,7 +23,6 @@ class Router
             }
 
             require_once $file->getPathname();
-
             $className = basename($file->getPathname(), '.php');
 
             if (class_exists($className)) {
@@ -36,30 +35,35 @@ class Router
     {
         $reflectionClass = new ReflectionClass($controllerName);
         foreach ($reflectionClass->getMethods() as $method) {
-            $routeAttribute = $method->getAttributes(Route::class)[0] ?? null;
-            if ($routeAttribute) {
+            $routeAttributes = $method->getAttributes(Route::class);
+            foreach ($routeAttributes as $routeAttribute) {
                 $routeData = $routeAttribute->newInstance();
-                $this->routes[$routeData->path] = [
+                $this->routes[] = [
+                    'path' => $routeData->path,
+                    'methods' => $routeData->methods,
                     'controller' => $controllerName,
-                    'method' => $method->getName()
+                    'action' => $method->getName(),
                 ];
             }
         }
     }
 
-    public function dispatch(): void
+    public function dispatch(string $requestUri, string $requestMethod): void
     {
-        // Capture the actual request URI from the server superglobal
-        $requestUri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        foreach ($this->routes as $routeInfo) {
+            $pattern = "@^" . str_replace("/", "\\/", $routeInfo['path']) . "$@";
 
-        if (isset($this->routes[$requestUri])) {
-            $controllerName = $this->routes[$requestUri]['controller'];
-            $methodName = $this->routes[$requestUri]['method'];
+            if (in_array($requestMethod, $routeInfo['methods']) && preg_match($pattern, $requestUri, $matches)) {
+                array_shift($matches); // Remove the entire string that was matched
 
-            $controller = $this->container->get($controllerName);
-            $controller->$methodName();
-        } else {
-            echo "Route {$requestUri} not found.\n";
+                $controllerName = $routeInfo['controller'];
+                $methodName = $routeInfo['action'];
+
+                $controller = $this->container->get($controllerName);
+                call_user_func_array([$controller, $methodName], $matches);
+                return;
+            }
         }
+        echo "Route $requestUri with method $requestMethod not found.\n";
     }
 }

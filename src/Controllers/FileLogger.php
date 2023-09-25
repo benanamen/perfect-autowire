@@ -6,6 +6,6 @@ class FileLogger implements LoggerInterface
 {
     public function log(string $message): void
     {
-        echo "Logged: {$message}\n";
+        echo "Logged: $message";
     }
 }
